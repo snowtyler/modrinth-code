@@ -305,7 +305,8 @@ opt-level = 3
 [profile.release]
 opt-level = "s"  # Optimize for binary size
 strip = true  # Remove debug symbols
-lto = true  # Enables link to optimizations
+lto = "thin"  # Enable parallel ThinLTO for fast builds
+codegen-units = 16  # Parallelize code generation across CPU cores
 panic = "abort"  # Strip expensive panic clean-up logic
 
 # Specific profile for labrinth production builds

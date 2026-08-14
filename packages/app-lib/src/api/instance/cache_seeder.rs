@@ -101,7 +101,7 @@ async fn seed_cache_entry(instance_dir: &Path, entry: &SeedCacheEntry) -> crate:
             instance_id: String::new(),
             instance_name: entry.name.clone(),
         },
-        1.0,
+        100.0,
         &format!("Downloading {}", entry.name),
     )
     .await?;
@@ -124,6 +124,7 @@ async fn seed_cache_entry(instance_dir: &Path, entry: &SeedCacheEntry) -> crate:
     let mut file = tokio::fs::File::create(&temp_download_path).await?;
     let mut hasher = Sha256::new();
     let mut downloaded: u64 = 0;
+    let mut last_reported_pct: f64 = 0.0;
 
     while let Some(chunk_res) = stream.next().await {
         let chunk = chunk_res.map_err(|err| {
@@ -136,19 +137,30 @@ async fn seed_cache_entry(instance_dir: &Path, entry: &SeedCacheEntry) -> crate:
 
         if let Some(total) = total_size {
             if total > 0 {
-                let progress = (downloaded as f64) / (total as f64);
-                let current_mb = (downloaded as f64) / (1024.0 * 1024.0);
-                let total_mb = (total as f64) / (1024.0 * 1024.0);
-                let _ = emit_loading(
-                    &loading_key,
-                    progress * 0.7,
-                    Some(&format!(
-                        "Downloading {} ({:.1} MB / {:.1} MB)",
-                        entry.name, current_mb, total_mb
-                    )),
-                );
+                // Download phase covers 0% to 80% of total progress
+                let current_pct = ((downloaded as f64) / (total as f64)) * 80.0;
+                let delta = current_pct - last_reported_pct;
+                if delta >= 0.5 {
+                    let current_mb = (downloaded as f64) / (1024.0 * 1024.0);
+                    let total_mb = (total as f64) / (1024.0 * 1024.0);
+                    let _ = emit_loading(
+                        &loading_key,
+                        delta,
+                        Some(&format!(
+                            "Downloading {} ({:.1} MB / {:.1} MB)",
+                            entry.name, current_mb, total_mb
+                        )),
+                    );
+                    last_reported_pct = current_pct;
+                }
             }
         }
+    }
+
+    // Flush any remaining download progress up to 80%
+    if 80.0 > last_reported_pct {
+        let delta = 80.0 - last_reported_pct;
+        let _ = emit_loading(&loading_key, delta, None);
     }
 
     file.flush().await?;
@@ -167,9 +179,10 @@ async fn seed_cache_entry(instance_dir: &Path, entry: &SeedCacheEntry) -> crate:
         }
     }
 
+    // Extraction phase (80% to 95%)
     let _ = emit_loading(
         &loading_key,
-        0.8,
+        15.0,
         Some(&format!("Extracting {}...", entry.name)),
     );
 
@@ -192,9 +205,10 @@ async fn seed_cache_entry(instance_dir: &Path, entry: &SeedCacheEntry) -> crate:
     let timestamp = chrono::Utc::now().to_rfc3339();
     tokio::fs::write(&marker_path, format!("SEEDED_AT={timestamp}\n")).await?;
 
+    // Completion (95% to 100%)
     let _ = emit_loading(
         &loading_key,
-        1.0,
+        5.0,
         Some(&format!("Seeded {}", entry.name)),
     );
 
