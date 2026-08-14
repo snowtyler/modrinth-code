@@ -128,21 +128,6 @@
   "app.action-bar.view-logs": {
     "message": "ログを表示"
   },
-  "app.ads-consent.accept": {
-    "message": "すべて受け入れる"
-  },
-  "app.ads-consent.body": {
-    "message": "Modrinthは広告収益によって運営され、クリエイターへの報酬も広告収益から支払われています。当社のパートナーは、広告のパーソナライズや効果測定のために、アプリ内でCookieを保存・利用する場合があります。"
-  },
-  "app.ads-consent.manage": {
-    "message": "設定の管理"
-  },
-  "app.ads-consent.reject": {
-    "message": "すべて拒否する"
-  },
-  "app.ads-consent.title": {
-    "message": "プライバシーと広告がModrinthを支える仕組み"
-  },
   "app.appearance-settings.advanced-rendering.description": {
     "message": "背景のぼかしなどの視覚効果を有効にします。ハードウェアアクセラレーションが無効の場合、パフォーマンスが低下する可能性があります。"
   },
@@ -776,9 +761,6 @@
   "app.nav.signed-in-as": {
     "message": "<user>{username}</user>としてサインイン中"
   },
-  "app.nav.upgrade-to-modrinth-plus": {
-    "message": "Modrinth+にアップグレード"
-  },
   "app.news.title": {
     "message": "ニュース"
   },
@@ -910,9 +892,6 @@
   },
   "app.settings.operating-system.macos": {
     "message": "MacOS"
-  },
-  "app.settings.privacy.ads-consent.intro": {
-    "message": "Modrinthは広告収益によって運営され、クリエイターへの報酬も広告収益から支払われています。当社のパートナーは、広告のパーソナライズや効果測定のために、アプリ内でCookieを保存・利用する場合があります。この機能は下のボタンから個別に拒否や許可または変更することができます。"
   },
   "app.settings.privacy.discord-rich-presence.description": {
     "message": "Discordの現在のプレイ中に Modrinth App を表示します。これはModによってインスタンスに追加されるRich Presenceには影響しません。適用にはアプリの再起動が必要です。"

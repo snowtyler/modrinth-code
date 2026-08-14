@@ -128,21 +128,6 @@
   "app.action-bar.view-logs": {
     "message": "Günlükleri görüntüle"
   },
-  "app.ads-consent.accept": {
-    "message": "Hepsini kabul et"
-  },
-  "app.ads-consent.body": {
-    "message": "Reklamlar, Modrinth'i mümkün kılıyor ve içerik üreticilerine yapılan ödemeleri finanse ediyor. Partnerlerimiz, reklamları kişiselleştirmek ve performansı ölçmek amacıyla uygulama içinde çerez depolayabilir veya bunlara erişebilir."
-  },
-  "app.ads-consent.manage": {
-    "message": "Tercihleri yönet"
-  },
-  "app.ads-consent.reject": {
-    "message": "Hepsini reddet"
-  },
-  "app.ads-consent.title": {
-    "message": "Sizin mahremiyetiniz ve reklamlar Modrinth'i nasıl destekler"
-  },
   "app.appearance-settings.advanced-rendering.description": {
     "message": "Arka plan bulanıklığı gibi görsel efektleri etkinleştirin. Bu, donanım ivmelendirme yokken performansı etkileyebilir."
   },
@@ -716,9 +701,6 @@
   "app.nav.signed-in-as": {
     "message": "<user>{username}</user> olarak oturum açıldı"
   },
-  "app.nav.upgrade-to-modrinth-plus": {
-    "message": "Modrinth+'a yükselt"
-  },
   "app.news.title": {
     "message": "Haberler"
   },
@@ -778,9 +760,6 @@
   },
   "app.settings.operating-system.macos": {
     "message": "macOS"
-  },
-  "app.settings.privacy.ads-consent.intro": {
-    "message": "Reklamlar, Modrinth'i mümkün kılıyor ve içerik üreticilerine yapılan ödemeleri finanse ediyor. Partnerlerimiz, reklamları kişiselleştirmek ve performansı ölçmek amacıyla uygulama içinde çerez depolayabilir veya bunlara erişebilir. Aşağıdan tercihinizi yönetebilir veya vazgeçebilirsiniz."
   },
   "app.settings.privacy.telemetry.title": {
     "message": "Telemetri"

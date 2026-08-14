@@ -128,21 +128,6 @@
   "app.action-bar.view-logs": {
     "message": "Pokaż logi"
   },
-  "app.ads-consent.accept": {
-    "message": "Zaakceptuj wszystko"
-  },
-  "app.ads-consent.body": {
-    "message": "Reklamy pozwalają Modrinth oraz fundują wypłaty twórców. Nasi partnerzy mogą zachować lub uzyskać dostęp ciasteczek w aplikacji, żeby spersonalizować reklamy i zmierzyć wydajność."
-  },
-  "app.ads-consent.manage": {
-    "message": "Zarządzaj preferencjami"
-  },
-  "app.ads-consent.reject": {
-    "message": "Odrzuć wszystkie"
-  },
-  "app.ads-consent.title": {
-    "message": "Twoja prywatność i jak reklamy wspierają Modrinth"
-  },
   "app.appearance-settings.advanced-rendering.description": {
     "message": "Włącz efekty wizualne, takie jak rozmycie tła. Może to negatywnie wpłynąć na wydajność, jeżeli akceleracja sprzętowa jest wyłączona."
   },
@@ -740,9 +725,6 @@
   "app.nav.signed-in-as": {
     "message": "Zalogowano jako <user>{username}</user>"
   },
-  "app.nav.upgrade-to-modrinth-plus": {
-    "message": "Ulepsz do Modrinth+"
-  },
   "app.news.title": {
     "message": "Aktualności"
   },
@@ -844,9 +826,6 @@
   },
   "app.settings.operating-system.macos": {
     "message": "macOS"
-  },
-  "app.settings.privacy.ads-consent.intro": {
-    "message": "Reklamy pozwalają na dalsze działanie Modrinth i finansują dochody dla twórców. Nasi partnerzy mogą gromadzić albo uzyskiwać dostęp do plików cookies w celu personalizacji reklam i mierzenia skuteczności."
   },
   "app.settings.privacy.discord-rich-presence.description": {
     "message": "Pokazuj Modrinth App jako aktywność na Discord. Nie wpływa to na Rich Presence dodane do instancji przez mody. Wymaga ponownego uruchomienia aplikacji."

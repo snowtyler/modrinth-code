@@ -71,9 +71,6 @@
   "app.action-bar.view-logs": {
     "message": "Zobrazit logy"
   },
-  "app.ads-consent.title": {
-    "message": "Vaše soukromí a způsob, jakým reklamy podporují Modrinth"
-  },
   "app.appearance-settings.advanced-rendering.title": {
     "message": "Pokročilé vykreslování"
   },

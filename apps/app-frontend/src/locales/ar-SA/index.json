@@ -125,15 +125,6 @@
   "app.action-bar.view-logs": {
     "message": "عرض التسجيل"
   },
-  "app.ads-consent.accept": {
-    "message": "قبول الكل"
-  },
-  "app.ads-consent.manage": {
-    "message": "إدارة التفضيلات"
-  },
-  "app.ads-consent.reject": {
-    "message": "رفض الكل"
-  },
   "app.appearance-settings.advanced-rendering.title": {
     "message": "العرض المتقدم"
   },

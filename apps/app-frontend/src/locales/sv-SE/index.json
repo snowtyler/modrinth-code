@@ -125,21 +125,6 @@
   "app.action-bar.view-logs": {
     "message": "Visa loggar"
   },
-  "app.ads-consent.accept": {
-    "message": "Godkänn alla"
-  },
-  "app.ads-consent.body": {
-    "message": "Reklam gör Modrinth möjligt och finansierar utbetalningar till skapare. Våra partners kan lagra eller komma åt cookies i appen för att Personalisera reklam och mäta statistik."
-  },
-  "app.ads-consent.manage": {
-    "message": "Hantera inställningar"
-  },
-  "app.ads-consent.reject": {
-    "message": "Neka alla"
-  },
-  "app.ads-consent.title": {
-    "message": "Din integritet och hur reklam stödjer Modrinth"
-  },
   "app.appearance-settings.advanced-rendering.title": {
     "message": "Avancerad rendering"
   },
@@ -746,9 +731,6 @@
   "app.nav.signed-in-as": {
     "message": "Inloggad som <user>{username}</user>"
   },
-  "app.nav.upgrade-to-modrinth-plus": {
-    "message": "Upgradera till Modrinth+"
-  },
   "app.news.title": {
     "message": "Nyheter"
   },
@@ -841,9 +823,6 @@
   },
   "app.settings.operating-system.macos": {
     "message": "macOS"
-  },
-  "app.settings.privacy.ads-consent.intro": {
-    "message": "Reklam gör Modrinth möjligt och finansierar utbetalningar till skapare. Våra partners kan lagra eller komma åt cookies i appen för att Personalisera reklam och mäta statistik."
   },
   "app.settings.privacy.telemetry.description": {
     "message": "Modrinth samlar in anonymiserad statistik och användningsdata för att förbättra vår användarupplevelse och anpassa din upplevelse. Genom att inaktivera det här alternativet avanmäler du dig och din data kommer inte längre samlas in."

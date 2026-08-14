@@ -44,12 +44,6 @@
   "app.action-bar.view-logs": {
     "message": "Vezi jurnalele"
   },
-  "app.ads-consent.accept": {
-    "message": "Acceptă tot"
-  },
-  "app.ads-consent.reject": {
-    "message": "Refuză tot"
-  },
   "app.auth-servers.unreachable.body": {
     "message": "Serverele de autentificare Minecraft pot fi indisponibile în acest moment. Verificați conexiunea la internet și încercați din nou mai târziu."
   },

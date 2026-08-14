@@ -3,6 +3,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use async_walkdir::WalkDir;
+use futures::StreamExt;
 use io::IOError;
 use serde::{Deserialize, Serialize};
 
@@ -428,11 +430,7 @@ pub(crate) async fn finish_import(
     Ok(())
 }
 
-/// Recursively get a list of all subfiles in src
-/// uses async recursion
-
-#[async_recursion::async_recursion]
-#[tracing::instrument]
+/// Iteratively gets a list of all subfiles in src without recursive stack consumption
 pub async fn get_all_subfiles(
     src: &Path,
     include_empty_dirs: bool,
@@ -442,24 +440,65 @@ pub async fn get_all_subfiles(
     }
 
     let mut files = Vec::new();
-    let mut dir = io::read_dir(&src).await?;
+    let mut walker = WalkDir::new(src);
+    while let Some(entry) = walker.next().await {
+        let entry = entry.map_err(|e| {
+            crate::ErrorKind::FSError(format!(
+                "Failed to read subfile path: {e}"
+            ))
+        })?;
+        let entry_path = entry.path();
+        if entry_path == src {
+            continue;
+        }
 
-    let mut has_files = false;
-    while let Some(child) = dir
-        .next_entry()
-        .await
-        .map_err(|e| IOError::with_path(e, src))?
-    {
-        has_files = true;
-        let src_child = child.path();
-        files.append(
-            &mut get_all_subfiles(&src_child, include_empty_dirs).await?,
-        );
-    }
+        let file_type = entry.file_type().await.map_err(|e| {
+            crate::ErrorKind::FSError(format!(
+                "Failed to read file type for {}: {e}",
+                entry_path.display()
+            ))
+        })?;
 
-    if !has_files && include_empty_dirs {
-        files.push(src.to_path_buf());
+        if !file_type.is_dir() {
+            files.push(entry_path);
+        } else if include_empty_dirs {
+            let mut read_dir = io::read_dir(&entry_path).await?;
+            if read_dir.next_entry().await?.is_none() {
+                files.push(entry_path);
+            }
+        }
     }
 
     Ok(files)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_get_all_subfiles_iterative() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let root = temp_dir.path();
+
+        let sub_dir = root.join("sub").join("nested");
+        tokio::fs::create_dir_all(&sub_dir).await.unwrap();
+
+        let empty_dir = root.join("empty_dir");
+        tokio::fs::create_dir_all(&empty_dir).await.unwrap();
+
+        let file1 = root.join("file1.txt");
+        let file2 = sub_dir.join("file2.txt");
+        tokio::fs::write(&file1, b"hello").await.unwrap();
+        tokio::fs::write(&file2, b"world").await.unwrap();
+
+        let files = get_all_subfiles(root, false).await.unwrap();
+        assert_eq!(files.len(), 2);
+        assert!(files.contains(&file1));
+        assert!(files.contains(&file2));
+
+        let files_with_empty = get_all_subfiles(root, true).await.unwrap();
+        assert_eq!(files_with_empty.len(), 3);
+        assert!(files_with_empty.contains(&empty_dir));
+    }
 }
