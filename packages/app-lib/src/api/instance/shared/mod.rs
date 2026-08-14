@@ -28,10 +28,17 @@ pub(crate) const CONFIG_BUNDLE_FILE_NAME: &str = "configs.zip";
 pub(crate) const CONFIG_BUNDLE_FILE_TYPE: &str = "configs";
 pub(crate) const CONFIG_SYNC_ENABLED: bool = true;
 pub(crate) const CONFIG_DIRECTORY: &str = "config";
+pub(crate) const SHARED_ROOT_DIRECTORIES: [&str; 5] = [
+    "config",
+    "defaultconfigs",
+    "kubejs",
+    "openloader",
+    "schematics",
+];
 pub(crate) const MAX_CONFIG_BUNDLE_ENTRIES: usize = 4096;
 pub(crate) const MAX_CONFIG_BUNDLE_FILE_SIZE: u64 = 16 * 1024 * 1024;
 pub(crate) const MAX_CONFIG_BUNDLE_TOTAL_SIZE: u64 = 128 * 1024 * 1024;
-pub(crate) const CONFIG_FILE_EXTENSIONS: [&str; 14] = [
+pub(crate) const CONFIG_FILE_EXTENSIONS: [&str; 24] = [
     "json",
     "json5",
     "jsonc",
@@ -46,6 +53,16 @@ pub(crate) const CONFIG_FILE_EXTENSIONS: [&str; 14] = [
     "properties",
     "xml",
     "nbt",
+    "snbt",
+    "js",
+    "zs",
+    "kubejs",
+    "schem",
+    "schematic",
+    "png",
+    "ogg",
+    "mcmeta",
+    "dat",
 ];
 
 pub(crate) fn read_bounded_config_bundle_entry(

@@ -23,7 +23,7 @@ import { computed, readonly, ref, watch } from 'vue'
 import JavaDetectionModal from '@/components/ui/JavaDetectionModal.vue'
 import useJavaTest from '@/composables/useJavaTest'
 import useMemorySlider from '@/composables/useMemorySlider'
-import { edit, get_optimal_jre_key } from '@/helpers/instance'
+import { edit, get_java_recommendations, get_optimal_jre_key } from '@/helpers/instance'
 import { get } from '@/helpers/settings.ts'
 
 import type { AppSettings } from '../../../../helpers/types'
@@ -37,6 +37,14 @@ const { instance } = injectInstanceSettings()
 const globalSettings = (await get().catch(handleError)) as unknown as AppSettings
 
 const optimalJava = readonly(await get_optimal_jre_key(instance.value.id).catch(handleError))
+const javaRecommendations = readonly(
+	await get_java_recommendations(instance.value.id).catch(() => null),
+)
+
+const recommendedRamGb = computed(() => {
+	if (!javaRecommendations?.recommended_memory_mb) return null
+	return (javaRecommendations.recommended_memory_mb / 1024).toFixed(1).replace(/\.0$/, '')
+})
 
 const overrideJavaInstall = ref(!!instance.value.java_path)
 const javaPath = ref(instance.value.java_path ?? optimalJava?.path ?? '')
@@ -282,9 +290,17 @@ const messages = defineMessages({
 				</div>
 			</div>
 		</div>
-		<h2 class="mt-4 mb-1 text-lg font-extrabold text-contrast block">
-			{{ formatMessage(messages.javaMemory) }}
-		</h2>
+		<div class="flex items-center justify-between mt-4 mb-1">
+			<h2 class="text-lg font-extrabold text-contrast block">
+				{{ formatMessage(messages.javaMemory) }}
+			</h2>
+			<span
+				v-if="recommendedRamGb"
+				class="rounded-full bg-primary/20 text-primary px-2.5 py-0.5 text-xs font-semibold"
+			>
+				Recommended by modpack: {{ recommendedRamGb }} GB RAM
+			</span>
+		</div>
 		<Checkbox
 			v-model="overrideMemorySettings"
 			:label="formatMessage(messages.customMemoryAllocation)"

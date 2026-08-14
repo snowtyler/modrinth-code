@@ -17,7 +17,9 @@ impl DiscordGuard {
     /// Initialize discord IPC client, and attempt to connect to it
     /// If it fails, it will still return a DiscordGuard, but the client will be unconnected
     pub fn init() -> crate::Result<DiscordGuard> {
-        let dipc = DiscordIpcClient::new("1123683254248148992");
+        let app_id = std::env::var("DISCORD_APP_ID")
+            .unwrap_or_else(|_| "1123683254248148992".to_string());
+        let dipc = DiscordIpcClient::new(&app_id);
 
         Ok(DiscordGuard {
             client: Arc::new(RwLock::new(dipc)),

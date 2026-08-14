@@ -205,6 +205,7 @@ fn main() {
                         "instance_get_linked_modpack_info",
                         "instance_get_linked_modpack_content",
                         "instance_get_optimal_jre_key",
+                        "instance_get_java_recommendations",
                         "instance_get_full_path",
                         "instance_get_mod_full_path",
                         "instance_list",

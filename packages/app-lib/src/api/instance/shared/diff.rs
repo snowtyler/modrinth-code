@@ -44,6 +44,28 @@ pub(super) async fn shared_instance_update_diffs(
     .await?;
     configuration_diffs.append(&mut diffs);
 
+    let instance_path = state
+        .directories
+        .instances_dir()
+        .join(&metadata.instance.path);
+    let local_config_files = collect_config_files(&instance_path)
+        .await
+        .unwrap_or_default();
+    if let Some(count) =
+        compute_config_diff(&instance_path, &local_config_files, version).await
+    {
+        configuration_diffs.push(SharedInstanceUpdateDiff {
+            type_: SharedInstanceUpdateDiffType::ConfigFilesUpdated,
+            project_id: None,
+            project_name: None,
+            file_name: None,
+            current_version_name: None,
+            new_version_name: None,
+            config_file_count: Some(count),
+            disabled: false,
+        });
+    }
+
     Ok(configuration_diffs)
 }
 
@@ -109,7 +131,95 @@ pub(super) async fn shared_instance_publish_diffs(
     .await?;
     configuration_diffs.append(&mut diffs);
 
+    let instance_path = state
+        .directories
+        .instances_dir()
+        .join(&metadata.instance.path);
+    if let Some(count) =
+        compute_config_diff(&instance_path, &snapshot.config_files, version)
+            .await
+    {
+        configuration_diffs.push(SharedInstanceUpdateDiff {
+            type_: SharedInstanceUpdateDiffType::ConfigFilesUpdated,
+            project_id: None,
+            project_name: None,
+            file_name: None,
+            current_version_name: None,
+            new_version_name: None,
+            config_file_count: Some(count),
+            disabled: false,
+        });
+    }
+
     Ok(configuration_diffs)
+}
+
+pub(super) async fn compute_config_diff(
+    instance_path: &std::path::Path,
+    local_config_files: &[ConfigFile],
+    remote_version: &InstanceVersionResponse,
+) -> Option<usize> {
+    let remote_bundle = remote_version
+        .external_files
+        .iter()
+        .find(|file| file.file_type == CONFIG_BUNDLE_FILE_TYPE);
+
+    let Some(remote_bundle) = remote_bundle else {
+        if local_config_files.is_empty() {
+            return None;
+        } else {
+            return Some(local_config_files.len());
+        }
+    };
+
+    let response = REQWEST_CLIENT.get(&remote_bundle.url).send().await.ok()?;
+    if !response.status().is_success() {
+        return None;
+    }
+    let bytes = response.bytes().await.ok()?;
+    let remote_entries = match tokio::task::spawn_blocking(move || {
+        read_config_bundle(bytes.as_ref())
+    })
+    .await
+    {
+        Ok(Ok(entries)) => entries,
+        _ => return None,
+    };
+
+    let mut changed_count = 0;
+    let mut local_paths = HashSet::new();
+
+    for file in local_config_files {
+        local_paths.insert(file.path.clone());
+        let local_file_path = instance_path.join(&file.path);
+        let Ok(local_bytes) = tokio::fs::read(&local_file_path).await else {
+            changed_count += 1;
+            continue;
+        };
+
+        match remote_entries.get(&file.path) {
+            Some(remote_bytes) => {
+                if remote_bytes != &local_bytes {
+                    changed_count += 1;
+                }
+            }
+            None => {
+                changed_count += 1;
+            }
+        }
+    }
+
+    for remote_path in remote_entries.keys() {
+        if !local_paths.contains(remote_path) {
+            changed_count += 1;
+        }
+    }
+
+    if changed_count > 0 {
+        Some(changed_count)
+    } else {
+        None
+    }
 }
 
 pub(super) async fn shared_instance_configuration_diffs(

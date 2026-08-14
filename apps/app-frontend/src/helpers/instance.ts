@@ -167,8 +167,19 @@ export interface JavaVersion {
 	path: string
 }
 
+export interface JavaRecommendationConfig {
+	recommended_memory_mb?: number
+	recommended_jvm_args?: string[]
+}
+
 export async function get_optimal_jre_key(instanceId: string): Promise<JavaVersion | null> {
 	return await invoke('plugin:instance|instance_get_optimal_jre_key', { instanceId })
+}
+
+export async function get_java_recommendations(
+	instanceId: string,
+): Promise<JavaRecommendationConfig | null> {
+	return await invoke('plugin:instance|instance_get_java_recommendations', { instanceId })
 }
 
 export async function list(): Promise<GameInstance[]> {

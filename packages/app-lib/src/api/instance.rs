@@ -1,11 +1,13 @@
 //! Theseus instance management interface
 
+pub mod cache_seeder;
 mod content;
 mod content_set_diff;
 mod export_mrpack;
 mod get;
 mod icon;
 mod install;
+pub mod java_recommendations;
 mod lifecycle;
 mod paths;
 mod projects;
@@ -44,7 +46,7 @@ pub use self::run::{
 };
 pub(crate) use self::shared::{
     CONFIG_BUNDLE_FILE_TYPE, CONFIG_DIRECTORY, CONFIG_FILE_EXTENSIONS,
-    CONFIG_SYNC_ENABLED, MAX_CONFIG_BUNDLE_ENTRIES,
+    CONFIG_SYNC_ENABLED, MAX_CONFIG_BUNDLE_ENTRIES, SHARED_ROOT_DIRECTORIES,
     read_bounded_config_bundle_entry,
 };
 pub use self::shared::{
@@ -64,4 +66,8 @@ pub use self::shared::{
     invite_shared_instance_users, publish_shared_instance,
     remove_shared_instance_users, revoke_shared_instance_invite,
     unlink_shared_instance, unpublish_shared_instance, update_shared_instance,
+};
+pub use self::cache_seeder::ensure_instance_caches_seeded;
+pub use self::java_recommendations::{
+    JavaRecommendationConfig, load_instance_java_recommendations,
 };

@@ -79,6 +79,20 @@ async fn run_credentials(
         .into());
     }
 
+    let instance_full_path = state
+        .directories
+        .instances_dir()
+        .join(&context.instance.path);
+
+    super::cache_seeder::ensure_instance_caches_seeded(&instance_full_path)
+        .await?;
+
+    let java_recommendation =
+        super::java_recommendations::load_instance_java_recommendations(
+            &instance_full_path,
+        )
+        .await;
+
     let pre_launch_hook = context
         .launch_overrides
         .hooks
@@ -87,11 +101,12 @@ async fn run_credentials(
         .or(settings.hooks.pre_launch.as_ref())
         .filter(|hook_command| !hook_command.is_empty());
 
-    let java_args = context
-        .launch_overrides
-        .extra_launch_args
-        .clone()
-        .unwrap_or(settings.extra_launch_args);
+    let java_args =
+        super::java_recommendations::resolve_effective_jvm_args(
+            context.launch_overrides.extra_launch_args.clone(),
+            settings.extra_launch_args,
+            java_recommendation.as_ref(),
+        );
 
     let wrapper = context
         .launch_overrides
@@ -115,7 +130,11 @@ async fn run_credentials(
         .or(settings.hooks.post_exit)
         .filter(|hook_command| !hook_command.is_empty());
 
-    let memory = context.launch_overrides.memory.unwrap_or(settings.memory);
+    let memory = super::java_recommendations::resolve_effective_memory(
+        context.launch_overrides.memory,
+        settings.memory,
+        java_recommendation.as_ref(),
+    );
     let resolution = context
         .launch_overrides
         .game_resolution
@@ -125,10 +144,7 @@ async fn run_credentials(
         || post_exit_hook.is_some();
     let full_path = if has_hook_commands {
         Some(crate::util::io::canonicalize(
-            state
-                .directories
-                .instances_dir()
-                .join(&context.instance.path),
+            instance_full_path,
         )?)
     } else {
         None

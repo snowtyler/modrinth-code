@@ -719,27 +719,34 @@ pub(super) async fn publish_current_content(
 pub(super) async fn collect_config_files(
     instance_path: &std::path::Path,
 ) -> crate::Result<Vec<ConfigFile>> {
-    let config_path = instance_path.join(CONFIG_DIRECTORY);
-    crate::util::io::create_dir_all(&config_path).await?;
     let mut files = Vec::new();
-    let mut walker = WalkDir::new(&config_path);
 
-    while let Some(entry) = walker.next().await {
-        let entry = entry.map_err(|error| {
-            crate::ErrorKind::OtherError(format!(
-                "Failed to read config directory: {error}"
-            ))
-        })?;
-        if !entry.file_type().await?.is_file()
-            || !is_supported_config_file(&entry.path())
-        {
+    for dir_name in SHARED_ROOT_DIRECTORIES {
+        let dir_path = instance_path.join(dir_name);
+        if dir_name == CONFIG_DIRECTORY {
+            let _ = crate::util::io::create_dir_all(&dir_path).await;
+        } else if !dir_path.exists() {
             continue;
         }
 
-        let entry_path = entry.path();
-        let relative_path = entry_path.strip_prefix(&config_path)?;
-        let path = relative_path.to_string_lossy().replace('\\', "/");
-        files.push(ConfigFile { path });
+        let mut walker = WalkDir::new(&dir_path);
+        while let Some(entry) = walker.next().await {
+            let entry = entry.map_err(|error| {
+                crate::ErrorKind::OtherError(format!(
+                    "Failed to read {dir_name} directory: {error}"
+                ))
+            })?;
+            if !entry.file_type().await?.is_file()
+                || !is_supported_config_file(&entry.path())
+            {
+                continue;
+            }
+
+            let entry_path = entry.path();
+            let relative_path = entry_path.strip_prefix(instance_path)?;
+            let path = relative_path.to_string_lossy().replace('\\', "/");
+            files.push(ConfigFile { path });
+        }
     }
 
     files.sort_by(|left, right| left.path.cmp(&right.path));
@@ -810,16 +817,15 @@ async fn build_config_bundle_candidate(
         entries.extend(archived_entries);
     }
 
-    let config_path = state
+    let instance_root = state
         .directories
         .instances_dir()
-        .join(instance_path)
-        .join(CONFIG_DIRECTORY);
+        .join(instance_path);
     for selected_path in selected_paths {
         let file = local_files_by_path
             .get(selected_path)
             .expect("selected config paths were validated");
-        let bytes = crate::util::io::read(config_path.join(&file.path)).await?;
+        let bytes = crate::util::io::read(instance_root.join(&file.path)).await?;
         entries.insert(file.path.clone(), bytes);
     }
 
@@ -897,7 +903,7 @@ async fn config_bundle_bytes(
     Ok(writer.close().await?)
 }
 
-fn read_config_bundle(
+pub(super) fn read_config_bundle(
     bytes: &[u8],
 ) -> crate::Result<BTreeMap<String, Vec<u8>>> {
     let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes))
@@ -938,16 +944,21 @@ fn read_config_bundle(
             ))
             .into());
         }
-        let path = path.to_string_lossy().replace('\\', "/");
+        let mut path_str = path.to_string_lossy().replace('\\', "/");
+        if !SHARED_ROOT_DIRECTORIES.iter().any(|dir| {
+            path_str.starts_with(&format!("{dir}/")) || path_str == *dir
+        }) {
+            path_str = format!("{CONFIG_DIRECTORY}/{path_str}");
+        }
         let declared_size = file.size();
         let bytes = read_bounded_config_bundle_entry(
             file,
             declared_size,
             &mut total_size,
         )?;
-        if entries.insert(path.clone(), bytes).is_some() {
+        if entries.insert(path_str.clone(), bytes).is_some() {
             return Err(crate::ErrorKind::InputError(format!(
-                "Shared instance config bundle contains duplicate file {path}"
+                "Shared instance config bundle contains duplicate file {path_str}"
             ))
             .into());
         }

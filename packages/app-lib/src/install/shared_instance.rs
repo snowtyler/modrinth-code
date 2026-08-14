@@ -9,7 +9,7 @@ use super::runner::{
 };
 use crate::api::instance::{
     CONFIG_BUNDLE_FILE_TYPE, CONFIG_DIRECTORY, CONFIG_FILE_EXTENSIONS,
-    CONFIG_SYNC_ENABLED, MAX_CONFIG_BUNDLE_ENTRIES,
+    CONFIG_SYNC_ENABLED, MAX_CONFIG_BUNDLE_ENTRIES, SHARED_ROOT_DIRECTORIES,
     read_bounded_config_bundle_entry,
 };
 use crate::api::pack::install_from::CreatePackLocation;
@@ -936,15 +936,20 @@ async fn install_shared_instance_config_bundle(
     .ok_or_else(|| {
         crate::ErrorKind::InputError("Unknown instance".to_string())
     })?;
-    let config_path = state
+    let instance_root = state
         .directories
         .instances_dir()
-        .join(metadata.instance.path)
-        .join(CONFIG_DIRECTORY);
-    crate::util::io::create_dir_all(&config_path).await?;
+        .join(metadata.instance.path);
 
     for (relative_path, bytes) in files {
-        let path = config_path.join(relative_path);
+        let path = if SHARED_ROOT_DIRECTORIES
+            .iter()
+            .any(|dir| relative_path.starts_with(dir))
+        {
+            instance_root.join(relative_path)
+        } else {
+            instance_root.join(CONFIG_DIRECTORY).join(relative_path)
+        };
         if let Some(parent) = path.parent() {
             crate::util::io::create_dir_all(parent).await?;
         }
